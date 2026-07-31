@@ -1,7 +1,51 @@
 import "server-only";
 import type { Profile, Role } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import type { ProfileRow } from "@/lib/supabase/types";
+
+/**
+ * 首次登录但意租还没有对应资料时（例如账号是在主站或意购注册的，
+ * 只共享了 auth.users，没共享 profiles 表），当场自动补一条 rent.profiles
+ * + 默认 user 角色，避免"密码验证通过但应用不认得你"的情况。
+ * 用 service role 客户端绕过 RLS 写入，与 actions.ts 里 registerAccount() 的
+ * 初始化逻辑保持一致，不为此单独放开 profiles 的 insert 策略。
+ */
+async function provisionProfile(
+  authUserId: string,
+  email: string | null,
+): Promise<ProfileRow | null> {
+  const admin = createAdminSupabaseClient();
+  if (!admin) return null;
+
+  const displayName = email?.split("@")[0] || "新用户";
+
+  const { data: profileRow, error } = await admin
+    .from("profiles")
+    .insert({
+      auth_user_id: authUserId,
+      display_name: displayName,
+      email,
+      primary_provider: "email",
+    })
+    .select("*")
+    .single();
+
+  if (error || !profileRow) {
+    console.error("provisionProfile", error?.message);
+    return null;
+  }
+
+  const { error: roleError } = await admin
+    .from("user_roles")
+    .insert({ user_id: profileRow.id, role: "user" });
+
+  if (roleError) {
+    console.error("provisionProfile role", roleError.message);
+  }
+
+  return profileRow;
+}
 
 function mapRowToProfile(row: ProfileRow, roles: Role[]): Profile {
   return {
@@ -37,22 +81,28 @@ export async function getCurrentProfile(): Promise<Profile | null> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;
 
-  const { data: profileRow, error: profileError } = await supabase
+  const { data: existingRow, error: profileError } = await supabase
     .from("profiles")
     .select("*")
     .eq("auth_user_id", auth.user.id)
     .is("deleted_at", null)
     .maybeSingle();
 
-  if (profileError || !profileRow) {
-    if (profileError) console.error("getCurrentProfile", profileError.message);
+  if (profileError) {
+    console.error("getCurrentProfile", profileError.message);
     return null;
+  }
+
+  if (!existingRow) {
+    const provisioned = await provisionProfile(auth.user.id, auth.user.email ?? null);
+    if (!provisioned) return null;
+    return mapRowToProfile(provisioned, ["user"]);
   }
 
   const { data: roleRows, error: roleError } = await supabase
     .from("user_roles")
     .select("role")
-    .eq("user_id", profileRow.id)
+    .eq("user_id", existingRow.id)
     .is("deleted_at", null);
 
   if (roleError) {
@@ -61,5 +111,5 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
   const roles = (roleRows ?? []).map((r) => r.role);
 
-  return mapRowToProfile(profileRow, roles.length > 0 ? roles : ["user"]);
+  return mapRowToProfile(existingRow, roles.length > 0 ? roles : ["user"]);
 }
