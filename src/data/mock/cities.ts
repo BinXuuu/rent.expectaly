@@ -1,0 +1,107 @@
+/**
+ * 演示数据：城市列表。复用「意购」项目已建立的 10 个意大利城市集合（独立维护，不做跨项目 import）。
+ */
+import type { City } from "@/types";
+
+const base = {
+  createdAt: "2026-07-01T09:00:00+02:00",
+  updatedAt: "2026-07-01T09:00:00+02:00",
+  deletedAt: null,
+  createdBy: null,
+  updatedBy: null,
+  country: "Italia",
+  isVisible: true,
+} as const;
+
+export const mockCities: City[] = [
+  {
+    id: "city-milano",
+    slug: "milano",
+    name: { "zh-CN": "米兰", "en-US": "Milano" },
+    heroImageUrl: "/images/placeholder/cities/milano-hero.svg",
+    introduction: { "zh-CN": "时尚与设计之都，租赁需求旺盛，房源以精装公寓为主。" },
+    sortOrder: 1,
+    ...base,
+  },
+  {
+    id: "city-firenze",
+    slug: "firenze",
+    name: { "zh-CN": "佛罗伦萨", "en-US": "Firenze" },
+    heroImageUrl: "/images/placeholder/cities/firenze-hero.svg",
+    introduction: { "zh-CN": "留学生与游学人群集中，合租房源较多。" },
+    sortOrder: 2,
+    ...base,
+  },
+  {
+    id: "city-roma",
+    slug: "roma",
+    name: { "zh-CN": "罗马", "en-US": "Roma" },
+    heroImageUrl: "/images/placeholder/cities/roma-hero.svg",
+    introduction: { "zh-CN": "首都城市，房源类型多样，交通便利性差异较大。" },
+    sortOrder: 3,
+    ...base,
+  },
+  {
+    id: "city-torino",
+    slug: "torino",
+    name: { "zh-CN": "都灵", "en-US": "Torino" },
+    heroImageUrl: "/images/placeholder/cities/torino-hero.svg",
+    introduction: { "zh-CN": "相对性价比较高的城市，长租房源较常见。" },
+    sortOrder: 4,
+    ...base,
+  },
+  {
+    id: "city-bologna",
+    slug: "bologna",
+    name: { "zh-CN": "博洛尼亚", "en-US": "Bologna" },
+    heroImageUrl: "/images/placeholder/cities/bologna-hero.svg",
+    introduction: { "zh-CN": "大学城，学生床位与单间房源需求集中。" },
+    sortOrder: 5,
+    ...base,
+  },
+  {
+    id: "city-venezia",
+    slug: "venezia",
+    name: { "zh-CN": "威尼斯", "en-US": "Venezia" },
+    heroImageUrl: "/images/placeholder/cities/venezia-hero.svg",
+    introduction: { "zh-CN": "旅游城市，租赁市场受季节性影响明显。" },
+    sortOrder: 6,
+    ...base,
+  },
+  {
+    id: "city-napoli",
+    slug: "napoli",
+    name: { "zh-CN": "那不勒斯", "en-US": "Napoli" },
+    heroImageUrl: "/images/placeholder/cities/napoli-hero.svg",
+    introduction: { "zh-CN": "南意城市，租金相对较低。" },
+    sortOrder: 7,
+    ...base,
+  },
+  {
+    id: "city-modena",
+    slug: "modena",
+    name: { "zh-CN": "摩德纳", "en-US": "Modena" },
+    heroImageUrl: "/images/placeholder/cities/modena-hero.svg",
+    introduction: { "zh-CN": "中小型城市，独立单间较多。" },
+    sortOrder: 8,
+    ...base,
+  },
+  {
+    id: "city-parma",
+    slug: "parma",
+    name: { "zh-CN": "帕尔马", "en-US": "Parma" },
+    heroImageUrl: "/images/placeholder/cities/parma-hero.svg",
+    introduction: { "zh-CN": "生活节奏较慢的城市，合租房源性价比较高。" },
+    sortOrder: 9,
+    ...base,
+  },
+  {
+    id: "city-other",
+    slug: "other",
+    name: { "zh-CN": "其他城市", "en-US": "Other Cities" },
+    heroImageUrl: "/images/placeholder/cities/other-hero.svg",
+    introduction: { "zh-CN": "尚未单独开设城市页的意大利地区房源。" },
+    sortOrder: 10,
+    ...base,
+  },
+];
