@@ -9,11 +9,13 @@ import type { NextRequest } from "next/server";
 const SUPABASE_COOKIE_NAME_PREFIX = "sb-auth-token";
 
 /**
- * 路由保护（Next.js 16：middleware 已重命名为 proxy）。
+ * 路由保护。Next.js 16 把 middleware 重命名为 proxy 并默认使用 Node.js 运行时，
+ * 但 Cloudflare 的 OpenNext 适配器暂不支持 Node.js Proxy，因此这里改用旧的
+ * middleware.ts 文件约定（仍受支持，默认 Edge 运行时）以兼容 Cloudflare 部署。
  * 仅做「是否存在会话 Cookie」的轻量校验，具体角色/权限判断在页面层
- * 通过 getCurrentProfile() + lib/permissions 完成，避免在 Proxy 中引入数据访问逻辑。
+ * 通过 getCurrentProfile() + lib/permissions 完成，避免在中间件中引入数据访问逻辑。
  */
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const hasSession = request.cookies
     .getAll()
     .some((c) => c.name.startsWith(SUPABASE_COOKIE_NAME_PREFIX));
